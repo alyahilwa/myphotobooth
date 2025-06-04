@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>O_O Self Photobooth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'light-blue': '#E6F7FF',
+                        'primary-blue': '#A5B4FC',
+                        'dark-blue': '#6366F1',
+                        'dreamy-pink': '#FEE2F8',
+                        'sweet-lilac': '#E9D5FF',
+                        'soft-yellow': '#FEF9C3',
+                        'minty': '#D1FAE5',
+                    },
+                    fontFamily: {
+                        'cute': ['"Zen Maru Gothic"', '"Caveat"', 'cursive'],
+                        'gameover': ['"Press Start 2P"', 'cursive'], // Added the new font
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Quicksand:wght@400;600&family=Zen+Maru+Gothic:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background: linear-gradient(135deg, #E6F7FF 0%, #FDEEFF 100%);
+            background-image: url(Background.jpg);
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        .camera-container {
+            border: 4px dashed #FBCFE8;
+            background-color: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .capture-btn {
+            background: linear-gradient(to right, #FEE2F8, #E0F2FE);
+            box-shadow: 0 0 15px #FBCFE8;
+            border: 2px solid #FBCFE8;
+        }
+
+        .filter-option {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .filter-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 12px #A5B4FC;
+        }
+
+        .filter-selected {
+            border: 3px solid #A5B4FC;
+            box-shadow: 0 0 15px #C4B5FD;
+            background-color: #F5F3FF;
+        }
+
+        .cute-shadow {
+            text-shadow: 1px 1px 2px #fbcfe8;
+        }
+
+        #countdown div {
+            text-shadow: 0 0 10px #fff;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            color: #F9A8D4; /* soft pink for better visibility */
+        }
+
+        #downloadPreview {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 50;
+        }
+
+        #downloadPreview img {
+            max-width: 90vw; /* Perkecil lebar maksimum */
+            max-height: 70vh; /* Perkecil tinggi maksimum */
+            margin-bottom: 10px;
+            border-radius: 5px;
+            object-fit: contain; /* Pastikan seluruh gambar terlihat */
+        }
+
+        #downloadPreview button {
+            background-color: #A5B4FC;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #downloadPreview button:hover {
+            background-color: #6366F1;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <header class ="bg-gradient-to-r from-[#FFE6F7] to-[#D6F0FF] text-black-800 py-6 mt-8">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-5xl font-gameover text-purple-300">
+                <i class="fas fa-camera-retro mr-3 text-purple-300"></i> Self Photobooth
+            </h1>
+            <p class="mt-2 text-pink-500 italic text-sm">made for introverts who like silly stuff ✨</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex flex-col items-center">
+        <div class="camera-container rounded-3xl overflow-hidden max-w-4xl w-full">
+            <div class="relative bg-gray-900">
+                <video id="video" autoplay playsinline class="w-full h-auto max-h-[70vh] object-cover" style="filter: none;"></video>
+                <canvas id="photoCanvas" class="hidden"></canvas>
+                <div id="result" class="absolute inset-0 flex items-center justify-center hidden">
+                    <img id="photo" alt="Your photo" class="max-w-full max-h-[70vh]">
+                </div>
+
+                <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
+                    <button id="mirrorBtn" class="bg-white rounded-full p-4 shadow-lg hover:bg-gray-100 transition-all">
+                        <i class="fas fa-retweet text-2xl text-primary-blue"></i>
+                    </button>
+                    <button id="captureBtn" class="capture-btn rounded-full p-5 transition-all">
+                        <i class="fas fa-camera text-3xl text-primary-blue"></i>
+                    </button>
+                    <button id="retakeBtn" class="bg-white rounded-full p-4 shadow-lg hover:bg-gray-100 transition-all hidden">
+                        <i class="fas fa-redo text-2xl text-primary-blue"></i>
+                    </button>
+                    <button id="previewBtn" class="bg-primary-blue text-white rounded-full p-4 shadow-lg hover:bg-dark-blue transition-all hidden">
+                        <i class="fas fa-eye text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6 bg-white bg-opacity-60">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">✨ Choose Your Filter ✨</h2>
+                <div class="flex space-x-4 overflow-x-auto pb-4">
+                    <button class="filter-option px-4 py-2 bg-white rounded-lg shadow filter-selected" data-filter="none">
+                    Normal
+                    </button>
+                    <button class="filter-option px-4 py-2 bg-white rounded-lg shadow" data-filter="grayscale">
+                        Grayscale
+                    </button>
+                    <button class="filter-option px-4 py-2 bg-white rounded-lg shadow" data-filter="sepia">
+                        Ditto
+                    </button>
+                    <button class="filter-option px-4 py-2 bg-white rounded-lg shadow" data-filter="invert">
+                        Invert
+                    </button>
+                    <button class="filter-option px-4 py-2 bg-white rounded-lg shadow" data-filter="hue-rotate">
+                        Alien
+                    </button>
+                    <button class="filter-option px-4 py-2 bg-white rounded-lg shadow" data-filter="glitter">Sparkle</button>
+                    <button class="filter-option px-4 py-2 bg-white rounded-lg shadow" data-filter="blur">Y2K</button>
+                    <button class="filter-option px-4 py-2 bg-white rounded-lg shadow" data-filter="purikura">Purikura</button>
+                    <button class="filter-option px-4 py-2 bg-white rounded-lg shadow" data-filter="kawaii">Starry</button>
+                    <button class="filter-option px-4 py-2 bg-white rounded-lg shadow" data-filter="ribbon">Ribbon</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="countdown" class="absolute inset-0 flex items-center justify-center hidden bg-black bg-opacity-70">
+            <div class="text-white text-9xl font-bold animate-bounce">3</div>
+        </div>
+
+        <div id="downloadPreview" class="hidden">
+            <img id="previewImage" src="" alt="Download Preview">
+            <button id="confirmDownloadBtn">Download Photo</button>
+            <button id="closePreviewBtn">Close</button>
+        </div>
+    </main>
+
+    <footer class="bg-gradient-to-r from-[#FFE6F7] to-[#D6F0FF] text-black-800 py-6 mt-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-black-800">© 2025 O_O Self Photobooth. Made with <i class="fas fa-heart text-pink-400"></i></p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <a href="#" class="text-black-800 hover:text-gray-400"><i class="fab fa-instagram text-2xl"></i></a>
+                <a href="#" class="text-black-800 hover:text-gray-400"><i class="fab fa-twitter text-2xl"></i></a>
+                <a href="#" class="text-black-800 hover:text-gray-400"><i class="fab fa-facebook text-2xl"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <svg width="0" height="0">
+        <filter id="glitter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" result="turb"/>
+            <feDisplacementMap in2="turb" in="SourceGraphic" scale="8" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+        <filter id="purikura-filter">
+            <feComponentTransfer>
+                <feFuncR type="linear" slope="1.2" intercept="0"/>
+                <feFuncG type="linear" slope="1.2" intercept="0"/>
+                <feFuncB type="linear" slope="1.2" intercept="0"/>
+            </feComponentTransfer>
+            <feColorMatrix type="saturate" values="1.5"/>
+            <feColorMatrix type="brightness" values="1.1"/>
+        </filter>
+        <filter id="kawaii-filter">
+            <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="pink" flood-opacity="0.8"/>
+            <feComponentTransfer>
+                <feFuncR type="linear" slope="1.1" intercept="0"/>
+                <feFuncG type="linear" slope="1.1" intercept="0"/>
+                <feFuncB type="linear" slope="1.1" intercept="0"/>
+            </feComponentTransfer>
+            <feColorMatrix type="contrast" values="1.2"/>
+        </filter>
+        <filter id="ribbon-filter">
+            <feColorMatrix type="hueRotate" values="-10"/>
+            <feColorMatrix type="saturate" values="1.4"/>
+        </filter>
+    </svg>
+
+    <script>
+        const video = document.getElementById('video');
+        const photo = document.getElementById('photo');
+        const photoCanvas = document.getElementById('photoCanvas');
+        const result = document.getElementById('result');
+        const captureBtn = document.getElementById('captureBtn');
+        const retakeBtn = document.getElementById('retakeBtn');
+        const previewBtn = document.getElementById('previewBtn'); // New preview button
+        const countdown = document.getElementById('countdown');
+        const filterOptions = document.querySelectorAll('.filter-option');
+        const mirrorBtn = document.getElementById('mirrorBtn');
+        const downloadPreview = document.getElementById('downloadPreview'); // Preview modal
+        const previewImage = document.getElementById('previewImage'); // Image in preview
+        const confirmDownloadBtn = document.getElementById('confirmDownloadBtn'); // Download button in preview
+        const closePreviewBtn = document.getElementById('closePreviewBtn'); // Close preview button
+        let mirror = false;
+        let currentFilter = 'none';
+        let stream;
+        let capturedImageURL;
+
+        async function initCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+                    audio: false
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+                alert("Could not access the camera. Please check permissions and try again.");
+            }
+        }
+
+        function toggleMirror() {
+            mirror = !mirror;
+            video.style.transform = mirror ? 'scaleX(-1)' : 'scaleX(1)';
+        }
+
+        function getFilterValue(filter) {
+            switch (filter) {
+                case 'grayscale': return 'grayscale(100%)';
+                case 'sepia': return 'sepia(100%)';
+                case 'invert': return 'invert(100%)';
+                case 'hue-rotate': return 'hue-rotate(90deg)';
+                case 'glitter': return 'url(#glitter))';
+                case 'blur': return 'blur(5px)';
+                case 'purikura': return 'url(#purikura-filter)';
+                case 'kawaii': return 'url(#kawaii-filter)';
+                case 'ribbon': return 'url(#ribbon-filter)';
+                default: return 'none';
+            }
+        }
+
+        function applyFilterToVideo() {
+            video.style.filter = getFilterValue(currentFilter);
+        }
+
+        function capturePhoto() {
+            let count = 3;
+            countdown.classList.remove('hidden');
+            const countdownInterval = setInterval(() => {
+                countdown.querySelector('div').textContent = count;
+                count--;
+                if (count < 0) {
+                    clearInterval(countdownInterval);
+                    countdown.classList.add('hidden');
+                    const finalCanvas = document.createElement('canvas');
+                    const finalContext = finalCanvas.getContext('2d');
+                    finalCanvas.width = video.videoWidth;
+                    finalCanvas.height = video.videoHeight;
+                    finalContext.filter = video.style.filter;
+                    if (mirror) {
+                        finalContext.translate(finalCanvas.width, 0);
+                        finalContext.scale(-1, 1);
+                    }
+                    finalContext.drawImage(video, 0, 0, finalCanvas.width, finalCanvas.height);
+                    capturedImageURL = finalCanvas.toDataURL('image/png');
+                    photo.src = capturedImageURL;
+                    photoCanvas.width = finalCanvas.width;
+                    photoCanvas.height = finalCanvas.height;
+                    const canvasContext = photoCanvas.getContext('2d');
+                    canvasContext.drawImage(finalCanvas, 0, 0);
+                    result.classList.remove('hidden');
+                    video.classList.add('hidden');
+                    captureBtn.classList.add('hidden');
+                    retakeBtn.classList.remove('hidden');
+                    previewBtn.classList.remove('hidden'); // Show preview button
+                }
+            }, 1000);
+        }
+
+        function retakePhoto() {
+            result.classList.add('hidden');
+            video.classList.remove('hidden');
+            captureBtn.classList.remove('hidden');
+            retakeBtn.classList.add('hidden');
+            previewBtn.classList.add('hidden');
+            capturedImageURL = null;
+        }
+
+        previewBtn.addEventListener('click', () => {
+    previewImage.src = capturedImageURL;
+    downloadPreview.classList.remove('hidden');
+});
+
+closePreviewBtn.addEventListener('click', () => {
+    downloadPreview.classList.add('hidden');
+});
+
+confirmDownloadBtn.addEventListener('click', () => {
+    const a = document.createElement('a');
+    a.href = capturedImageURL;
+    a.download = 'my-photo.png';
+    a.click();
+});
+
+
+        function showPreview() {
+            if (capturedImageURL) {
+                previewImage.src = capturedImageURL;
+                downloadPreview.classList.remove('hidden');
+            }
+        }
+
+        function hidePreview() {
+            downloadPreview.classList.add('hidden');
+        }
+
+        function downloadPhoto() {
+            if (capturedImageURL) {
+                const link = document.createElement('a');
+                link.download = 'bangtan-photobooth-' + new Date().toISOString() + '.png';
+                link.href = capturedImageURL;
+                link.click();
+            }
+            hidePreview(); // Close the preview after download
+        }
+
+        captureBtn.addEventListener('click', capturePhoto);
+        retakeBtn.addEventListener('click', retakePhoto);
+        previewBtn.addEventListener('click', showPreview); // Event listener for preview
+        confirmDownloadBtn.addEventListener('click', downloadPhoto); // Event listener for download in preview
+        closePreviewBtn.addEventListener('click', hidePreview); // Event listener to close preview
+        mirrorBtn.addEventListener('click', toggleMirror);
+
+        filterOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                filterOptions.forEach(opt => opt.classList.remove('filter-selected'));
+                option.classList.add('filter-selected');
+                currentFilter = option.dataset.filter;
+                applyFilterToVideo();
+            });
+        });
+
+        window.addEventListener('load', initCamera);
+    </script>
+
+</body>
+</html>
