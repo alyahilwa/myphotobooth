@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kae the Apple Photobooth</title>
+  <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <style>
+    /* Basic Reset & Fonts */
+    * {margin:0; padding:0; box-sizing:border-box;}
+    body {
+      font-family: 'Yomogi', cursive;
+      background: linear-gradient(135deg, #ffe4e1, #fff7f1 60%, #ffdde1);
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    nav {
+      background-color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #ffd8d8;
+      position: sticky;
+      top: 0; z-index: 999;
+      box-shadow: 0 2px 5px rgba(255, 107, 129, 0.15);
+      width: 100%;
+      max-width: 900px;
+    }
+    nav .logo {
+      font-size: 1.8rem;
+      color: #ff6b81;
+      font-weight: bold;
+      letter-spacing: 1.2px;
+    }
+    nav .menu {
+      font-size: 1rem;
+      color: #ff6b81;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    header {
+      padding: 3rem 2rem 4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      background: linear-gradient(to bottom, #fff7f1, #ffe4e1);
+      border-radius: 0 0 30px 30px;
+      box-shadow: 0 8px 15px rgba(255, 107, 129, 0.2);
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 900px;
+    }
+    header h1 {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+      color: #ff6b81;
+      text-shadow: 1px 1px 2px #ffd1d8;
+    }
+    header p {
+      font-size: 1.25rem;
+      color: #a04b5b;
+      margin-bottom: 2rem;
+      font-weight: 500;
+    }
+    .btn-enter {
+      font-size: 1.3rem;
+      padding: 0.9rem 2rem;
+      background-color: #ff6b81;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-family: 'Press Start 2P', cursive;
+      box-shadow: 0 5px 10px rgba(255, 107, 129, 0.6);
+    }
+    .btn-enter:hover {
+      background-color: #ff4b6e;
+      box-shadow: 0 7px 15px rgba(255, 75, 110, 0.8);
+    }
+
+    #booth-wrapper {
+      display: flex;
+      gap: 2rem;
+      width: 100%;
+      max-width: 900px;
+      padding: 0 1rem 3rem;
+    }
+    #booth {
+      flex: 1 1 55%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #booth h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #ff6b81;
+      text-shadow: 0 1px 2px #ffccd5;
+    }
+    .camera-frame {
+      background: #fff0f4;
+      border: 3px dashed #ffb6c1;
+      border-radius: 25px;
+      padding: 1.5rem;
+      box-shadow: 0 7px 20px rgba(255, 107, 129, 0.25);
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      transition: box-shadow 0.3s ease;
+    }
+    .camera-frame:hover {
+      box-shadow: 0 10px 25px rgba(255, 107, 129, 0.45);
+    }
+    video {
+      border: 5px solid #ff6b81;
+      border-radius: 20px;
+      width: 100%;
+      max-height: 65vh;
+      margin-bottom: 1rem;
+      transition: 0.3s ease;
+      transform: scaleX(-1);
+      box-shadow: 0 0 12px #ff6b81aa;
+      object-fit: cover;
+      filter: none;
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+      margin-top: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .mirror-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+      background: #ffeaea;
+      padding: 0.5rem 1.2rem;
+      border-radius: 25px;
+      border: 1.5px solid #ffb6c1;
+      font-weight: 600;
+      user-select: none;
+      color: #d94f66;
+      box-shadow: 0 2px 8px #ffb6c144;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .mirror-toggle:hover {
+      background-color: #ffccd6;
+    }
+    .btn-capture {
+      background-color: #ff6b81;
+      color: white;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1rem;
+      padding: 0.6rem 1.4rem;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(255, 107, 129, 0.6);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn-capture:hover {
+      background-color: #ff4b6e;
+      box-shadow: 0 7px 20px rgba(255, 75, 110, 0.8);
+    }
+    .cut-options {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-weight: 600;
+      color: #d94f66;
+    }
+    .cut-options label {
+      margin-right: 1.8rem;
+      font-size: 1rem;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+    .cut-options label:hover {
+      color: #ff4b6e;
+    }
+    #countdown {
+      position: absolute;
+      font-size: 5rem;
+      color: #ff6b81;
+      font-family: 'Press Start 2P', cursive;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 99;
+      text-shadow: 1px 1px 5px #ff4b6eaa;
+      user-select: none;
+      pointer-events: none;
+      display: none;
+    }
+
+    #photo-results {
+      flex: 1 1 40%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #photoResultsTitle {
+      font-size: 2rem;
+      color: #ff6b81;
+      margin-bottom: 1rem;
+      text-shadow: 0 1px 2px #ffccd5;
+    }
+    #photoStrip {
+      border-radius: 20px;
+      background-color: white;
+      box-shadow: 0 8px 20px rgba(255, 107, 129, 0.25);
+      width: 320px;
+      height: 960px;
+      user-select: none;
+      margin-bottom: 1.5rem;
+      display: none;
+      position: relative;
+    }
+    /* Frame overlay images */
+    #frameOverlay {
+      position: absolute;
+      pointer-events: none;
+      top: 0;
+      left: 0;
+      width: 320px;
+      height: 960px;
+      user-select: none;
+      image-rendering: pixelated;
+    }
+
+    .frame-select {
+      margin: 1rem 0 2rem;
+      text-align: center;
+      font-weight: 600;
+      color: #d94f66;
+      user-select: none;
+    }
+    .frame-select input[type="radio"] {
+      display: none;
+    }
+    .frame-select label {
+      padding: 0.4rem 1.2rem;
+      border-radius: 999px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      margin: 0 0.6rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 8px #ff6b81aa;
+      background-color: #fff0f4;
+      color: #ff6b81;
+      font-weight: 700;
+      user-select: none;
+    }
+    .frame-select input[type="radio"]:checked + label {
+      background-color: #ff6b81;
+      color: white;
+      border-color: #ff6b81;
+      box-shadow: 0 5px 15px rgba(255, 107, 129, 0.8);
+    }
+
+    /* Filters section */
+    .filter-select {
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: 600;
+      color: #d94f66;
+      user-select: none;
+    }
+    .filter-select button {
+      margin: 0 0.4rem;
+      padding: 0.3rem 0.9rem;
+      border-radius: 999px;
+      border: 2px solid #ff6b81;
+      background-color: #fff0f4;
+      color: #ff6b81;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 3px 8px #ff6b81aa;
+      transition: all 0.3s ease;
+      font-family: 'Press Start 2P', cursive;
+    }
+    .filter-select button.active,
+    .filter-select button:hover {
+      background-color: #ff6b81;
+      color: white;
+      border-color: #ff6b81;
+      box-shadow: 0 5px 15px rgba(255, 107, 129, 0.8);
+    }
+
+    /* Responsive */
+    @media (max-width: 720px) {
+      #booth-wrapper {
+        flex-direction: column;
+        padding-bottom: 2rem;
+      }
+      #booth, #photo-results {
+        max-width: 100%;
+      }
+      video {
+        max-height: 40vh;
+      }
+      #photoStrip {
+        height: 480px;
+        width: 160px;
+      }
+      #frameOverlay {
+        width: 160px;
+        height: 480px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">Kae the Apple Photobooth</div>
+    <div class="menu">Let’s have some fun!</div>
+  </nav>
+
+  <header>
+    <h1>O__O Self Photobooth</h1>
+    <p>Timer 3 detik, pilih 3-cut atau 4-cut strip!</p>
+    <button id="enterBtn" class="btn-enter">Enter Booth</button>
+  </header>
+
+  <main style="display:none;" id="booth-wrapper">
+    <section id="booth">
+      <h2>Camera Preview</h2>
+      <div class="camera-frame" style="position:relative; width:320px; height:320px;">
+        <video id="video" autoplay playsinline muted></video>
+        <div id="countdown">3</div>
+      </div>
+      <div class="controls">
+        <label class="mirror-toggle" for="mirrorCheckbox">
+          <input type="checkbox" id="mirrorCheckbox" /> Mirror
+        </label>
+        <button id="btnCapture" class="btn-capture">Take Photo</button>
+      </div>
+    
+        <div class="cut-options">
+      <label>
+    <input type="radio" name="cutOption" value="3" checked /> 3-Cut Strip
+      </label>
+      <label>
+       <input type="radio" name="cutOption" value="1" /> 1-Cut Strip
+          </label>
+    </div>
+
+      <div class="frame-select">
+        Frame:
+        <input type="radio" name="frameColor" id="framePink" value="pink" checked />
+        <label for="framePink">Pink</label>
+        <input type="radio" name="frameColor" id="frameBlue" value="blue" />
+        <label for="frameBlue">Blue</label>
+        <input type="radio" name="frameColor" id="frameGreen" value="green" />
+        <label for="frameGreen">Green</label>
+      </div>
+
+      <div class="filter-select">
+        Filter:
+        <button data-filter="none" class="active">None</button>
+        <button data-filter="grayscale(100%)">Grayscale</button>
+        <button data-filter="sepia(100%)">Sepia</button>
+        <button data-filter="contrast(150%)">Contrast+</button>
+        <button data-filter="brightness(130%)">Bright+</button>
+        <button data-filter="invert(100%)">Invert</button>
+      </div>
+    </section>
+
+    <section id="photo-results">
+      <h2 id="photoResultsTitle">Your Photo Strip</h2>
+      <div style="position:relative;">
+        <canvas id="photoStrip"></canvas>
+        <img id="frameOverlay" src="" alt="Frame Overlay" />
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const enterBtn = document.getElementById('enterBtn');
+    const boothWrapper = document.getElementById('booth-wrapper');
+    const video = document.getElementById('video');
+    const mirrorCheckbox = document.getElementById('mirrorCheckbox');
+    const btnCapture = document.getElementById('btnCapture');
+    const countdownEl = document.getElementById('countdown');
+    const photoStrip = document.getElementById('photoStrip');
+    const frameOverlay = document.getElementById('frameOverlay');
+    const filterButtons = document.querySelectorAll('.filter-select button');
+    const frameRadios = document.querySelectorAll('input[name="frameColor"]');
+    const cutRadios = document.querySelectorAll('input[name="cutOption"]');
+
+    const frames = {
+      pink: 'https://ibb.co/mKYTYFD',
+      blue: 'https://i.ibb.co/9vV3ZHZ/frame-blue.png',
+      green: 'https://i.ibb.co/mhM8PxN/frame-green.png',
+    };
+
+    // Set initial frame overlay
+    frameOverlay.src = frames.pink;
+
+    let photos = [];
+    let countdownInterval;
+    let countdownValue;
+
+    // Show booth on enter
+    enterBtn.onclick = () => {
+      boothWrapper.style.display = 'flex';
+      enterBtn.parentElement.style.display = 'none';
+      startCamera();
+    };
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 320, height: 320 },
+          audio: false,
+        });
+        video.srcObject = stream;
+        video.style.filter = 'none';
+        video.style.transform = mirrorCheckbox.checked ? 'scaleX(-1)' : 'scaleX(1)';
+      } catch (err) {
+        alert('Camera access denied or unavailable.');
+        console.error(err);
+      }
+    }
+
+    // Mirror toggle event
+    mirrorCheckbox.addEventListener('change', () => {
+      video.style.transform = mirrorCheckbox.checked ? 'scaleX(-1)' : 'scaleX(1)';
+    });
+
+    // Frame selection
+    frameRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        frameOverlay.src = frames[radio.value];
+      });
+    });
+
+    // Filter buttons
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        video.style.filter = btn.dataset.filter;
+      });
+    });
+
+    // Countdown + Capture
+    btnCapture.addEventListener('click', () => {
+      if (countdownInterval) return; // Prevent double-click
+
+      countdownValue = 3;
+      countdownEl.textContent = countdownValue;
+      countdownEl.style.display = 'block';
+
+      countdownInterval = setInterval(() => {
+        countdownValue--;
+        if (countdownValue > 0) {
+          countdownEl.textContent = countdownValue;
+        } else {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+          countdownEl.style.display = 'none';
+          takePhoto();
+          drawPhotosStrip();
+        }
+      }, 1000);
+    });
+
+    function takePhoto() {
+      const width = 320;
+      const height = 320;
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = width;
+      tempCanvas.height = height;
+      const ctx = tempCanvas.getContext('2d');
+
+      // Apply mirror for capture
+      if (mirrorCheckbox.checked) {
+        ctx.translate(width, 0);
+        ctx.scale(-1, 1);
+      }
+
+      // Draw video frame only (filter in video, not canvas)
+      ctx.drawImage(video, 0, 0, width, height);
+
+      photos.push(tempCanvas);
+    }
+
+    function drawPhotosStrip() {
+      const cutCount = [...cutRadios].find(r => r.checked).value;
+      const width = 320;
+      const height = 320 * cutCount;
+
+      photoStrip.width = width;
+      photoStrip.height = height;
+      photoStrip.style.display = 'block';
+
+      const ctx = photoStrip.getContext('2d');
+      ctx.clearRect(0, 0, width, height);
+
+      for (let i = 0; i < cutCount; i++) {
+        if (photos[i]) {
+          ctx.drawImage(photos[i], 0, i * 320, width, 320);
+        }
+      }
+
+      // Show frame overlay size to match strip
+      frameOverlay.style.width = width + 'px';
+      frameOverlay.style.height = height + 'px';
+    }
+  </script>
+</body>
+</html>
